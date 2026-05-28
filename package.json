@@ -1,0 +1,40 @@
+{
+  "name": "leadpulse",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lead generation and email outreach — MailerFind-style workflow (self-hosted)",
+  "scripts": {
+    "dev": "concurrently -k \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "tsx watch server/index.ts",
+    "dev:client": "vite",
+    "build": "vite build && tsc -p server/tsconfig.json",
+    "start": "node dist-server/index.js",
+    "test": "vitest run",
+    "db:migrate": "tsx server/db/migrate.ts"
+  },
+  "dependencies": {
+    "@vercel/node": "^3.2.9",
+    "better-sqlite3": "^11.8.1",
+    "cors": "^2.8.5",
+    "csv-parse": "^5.6.0",
+    "csv-stringify": "^6.5.2",
+    "express": "^4.21.2",
+    "multer": "^1.4.5-lts.1",
+    "nanoid": "^5.1.0",
+    "nodemailer": "^6.10.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.10.5",
+    "@types/nodemailer": "^6.4.17",
+    "concurrently": "^9.1.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7",
+    "vitest": "^2.1.8"
+  }
+}
