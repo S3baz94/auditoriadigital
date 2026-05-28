@@ -2,6 +2,7 @@
   "name": "leadpulse",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "Lead generation and email outreach — MailerFind-style workflow (self-hosted)",
   "scripts": {
     "dev": "concurrently -k \"npm run dev:server\" \"npm run dev:client\"",
