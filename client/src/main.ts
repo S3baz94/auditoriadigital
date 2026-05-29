@@ -74,14 +74,13 @@ interface Bonus {
 }
 
 interface AuditReportResponse {
-  audit: {
-    id: string;
-    business_name: string;
-    website_url: string;
-    niche: string;
-    size: string;
-    geo?: string | null;
-  };
+  id: string;
+  business_name: string;
+  website_url: string;
+  niche: string;
+  size: string;
+  geo?: string | null;
+  survey: Record<string, string>;
   report: {
     segment: "emprendimiento" | "pequeno" | "crecimiento" | "establecido";
     segment_label: string;
@@ -93,7 +92,6 @@ interface AuditReportResponse {
     solution_system: SolutionStep[];
     bonuses: Bonus[];
   };
-  answers: Record<string, string>;
 }
 
 // ── Variables de Estado Global ──────────────────────────────────────────
@@ -127,34 +125,14 @@ const SIZES: SizeDef[] = [
   { code: "mediana", label: "Mediana o grande", description: "Más de 50 personas" },
 ];
 
-// Las 9 Preguntas de Diagnóstico de Negocio
+// Las 9 Preguntas de Diagnóstico de Negocio Reordenadas en 3 Ejes
 const QUESTIONS: Question[] = [
-  {
-    id: "goal_6m",
-    type: "single",
-    question: "¿Cuál es tu enfoque prioritario para los próximos 6 meses?",
-    helper: "Define la meta estratégica principal de tu negocio.",
-    options: [
-      { value: "more_clients", label: "Conseguir nuevos clientes o expandir mercado" },
-      { value: "more_revenue", label: "Aumentar el ticket promedio de compra o ventas" },
-      { value: "retention", label: "Fidelizar y hacer que los clientes actuales recompren" },
-      { value: "automate", label: "Automatizar procesos internos para ahorrar tiempo y costos" },
-    ],
-  },
-  {
-    id: "revenue_stability",
-    type: "single",
-    question: "¿Cómo calificarías la estabilidad de tus ingresos actuales?",
-    options: [
-      { value: "highly_variable", label: "Muy variable e impredecible mes a mes" },
-      { value: "stable_flat", label: "Estable, pero plano y sin crecimiento" },
-      { value: "growing", label: "Crecimiento constante y predecible" },
-    ],
-  },
+  // ── EJE 1: SERVICIOS (Clientes & Canales) ──
   {
     id: "acquisition_channel",
     type: "single",
     question: "¿Cuál es tu principal canal para atraer nuevos clientes hoy?",
+    helper: "Eje 1: Servicios. Entiende cómo llegan tus leads en este momento.",
     options: [
       { value: "referrals", label: "Recomendaciones de clientes existentes (boca a boca)" },
       { value: "paid_ads", label: "Publicidad digital de pago (Facebook, Instagram, Google)" },
@@ -163,19 +141,10 @@ const QUESTIONS: Question[] = [
     ],
   },
   {
-    id: "referral_frequency",
-    type: "single",
-    question: "¿Con qué frecuencia tus clientes actuales recomiendan tu negocio de forma activa?",
-    options: [
-      { value: "always", label: "Constantemente, el boca a boca es nuestro motor principal" },
-      { value: "sometimes", label: "Ocasionalmente, solo si alguien les pregunta de forma directa" },
-      { value: "never", label: "Rara vez o nunca nos recomiendan de forma activa" },
-    ],
-  },
-  {
     id: "response_time",
     type: "single",
     question: "¿Cuánto tiempo pasa en promedio desde que un cliente potencial te contacta hasta que recibe respuesta o cotización?",
+    helper: "Eje 1: Servicios. En digital, responder velozmente evita fugas comerciales.",
     options: [
       { value: "minutes", label: "Minutos (atención casi inmediata)" },
       { value: "hours", label: "Unas pocas horas" },
@@ -184,19 +153,35 @@ const QUESTIONS: Question[] = [
     ],
   },
   {
-    id: "sales_followup",
+    id: "referral_frequency",
     type: "single",
-    question: "¿Cómo manejas el seguimiento de las propuestas o cotizaciones enviadas?",
+    question: "¿Con qué frecuencia tus clientes actuales recomiendan tu negocio de forma activa?",
+    helper: "Eje 1: Servicios. Indica el nivel de lealtad y satisfacción de tu servicio actual.",
     options: [
-      { value: "crm", label: "Usamos un CRM estructurado para registrar y dar seguimiento" },
-      { value: "manual", label: "De forma manual, agendando recordatorios o por correo directo" },
-      { value: "none", label: "No realizamos un seguimiento sistemático" },
+      { value: "always", label: "Constantemente, el boca a boca es nuestro motor principal" },
+      { value: "sometimes", label: "Ocasionalmente, solo si alguien les pregunta de forma directa" },
+      { value: "never", label: "Rara vez o nunca nos recomiendan de forma activa" },
+    ],
+  },
+
+  // ── EJE 2: PRODUCTO & OPERACIÓN (Tecnología & Gestión) ──
+  {
+    id: "goal_6m",
+    type: "single",
+    question: "¿Cuál es tu enfoque prioritario para los próximos 6 meses?",
+    helper: "Eje 2: Producto & Operación. Define tus objetivos principales de escala.",
+    options: [
+      { value: "more_clients", label: "Conseguir nuevos clientes o expandir mercado" },
+      { value: "more_revenue", label: "Aumentar el ticket promedio de compra o ventas" },
+      { value: "retention", label: "Fidelizar y hacer que los clientes actuales recompren" },
+      { value: "automate", label: "Automatizar procesos internos para ahorrar tiempo y costos" },
     ],
   },
   {
     id: "operations_coordination",
     type: "single",
     question: "¿Cómo gestionas las tareas y la coordinación del día a día con tu equipo?",
+    helper: "Eje 2: Producto & Operación. Mide el nivel de digitalización operativa diaria.",
     options: [
       { value: "automated", label: "Totalmente automatizado con software de gestión de proyectos dedicado" },
       { value: "basic_tools", label: "Herramientas básicas como chats de WhatsApp o tableros de Trello" },
@@ -204,9 +189,34 @@ const QUESTIONS: Question[] = [
     ],
   },
   {
+    id: "tech_satisfaction",
+    type: "single",
+    question: "¿Qué tan satisfecho estás con las herramientas tecnológicas actuales de tu negocio?",
+    helper: "Eje 2: Producto & Operación. Mide el nivel de fricción técnica interna.",
+    options: [
+      { value: "very_satisfied", label: "Muy satisfecho, todo funciona integrado y rápido" },
+      { value: "partially_satisfied", label: "Parcialmente satisfecho, algunas herramientas nos limitan o están aisladas" },
+      { value: "unsatisfied", label: "Insatisfecho, la tecnología nos genera más fricción y problemas" },
+    ],
+  },
+
+  // ── EJE 3: PRECIO & COMERCIAL (Finanzas & CRM) ──
+  {
+    id: "revenue_stability",
+    type: "single",
+    question: "¿Cómo calificarías la estabilidad de tus ingresos actuales?",
+    helper: "Eje 3: Precio & Comercial. Evalúa la predictibilidad financiera de tu flujo.",
+    options: [
+      { value: "highly_variable", label: "Muy variable e impredecible mes a mes" },
+      { value: "stable_flat", label: "Estable, pero plano y sin crecimiento" },
+      { value: "growing", label: "Crecimiento constante y predecible" },
+    ],
+  },
+  {
     id: "pricing_strategy",
     type: "single",
     question: "¿Cómo defines los precios de tus productos o servicios?",
+    helper: "Eje 3: Precio & Comercial. Analiza tu posicionamiento en valor y márgenes.",
     options: [
       { value: "premium", label: "Precios premium basados en el valor que percibe el cliente" },
       { value: "cost_plus", label: "Margen fijo sumado sobre nuestros costos estimados" },
@@ -215,20 +225,21 @@ const QUESTIONS: Question[] = [
     ],
   },
   {
-    id: "tech_satisfaction",
+    id: "sales_followup",
     type: "single",
-    question: "¿Qué tan satisfecho estás con las herramientas tecnológicas actuales de tu negocio?",
+    question: "¿Cómo manejas el seguimiento de las propuestas o cotizaciones enviadas?",
+    helper: "Eje 3: Precio & Comercial. Evalúa el ratio de cierre y recuperación comercial.",
     options: [
-      { value: "very_satisfied", label: "Muy satisfecho, todo funciona integrado y rápido" },
-      { value: "partially_satisfied", label: "Parcialmente satisfecho, algunas herramientas nos limitan o están aisladas" },
-      { value: "unsatisfied", label: "Insatisfecho, la tecnología nos genera más fricción y problemas" },
+      { value: "crm", label: "Usamos un CRM estructurado para registrar y dar seguimiento" },
+      { value: "manual", label: "De forma manual, agendando recordatorios o por correo directo" },
+      { value: "none", label: "No realizamos un seguimiento sistemático" },
     ],
   },
 ];
 
 // Estructura del Wizard de Creación
 interface WizardState {
-  step: 1 | 2 | 3; // 1: Datos & Enlaces, 2: 9 Preguntas, 3: Escaneo/Carga
+  step: 1 | 2 | 3;
   business_name: string;
   website_url: string;
   instagram_url: string;
@@ -267,7 +278,7 @@ function shell(content: string): void {
           </nav>
         </div>
         <div style="font-size: 0.72rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 1rem;">
-          <p>PulseAudit v3.0.0</p>
+          <p>PulseAudit v3.1.0</p>
           <p>Plataforma de Cualificación B2B</p>
         </div>
       </aside>
@@ -428,7 +439,7 @@ async function renderDashboard(): Promise<void> {
   } catch (err) {
     console.error(err);
     const tbody = document.querySelector("#dashboard-table tbody")!;
-    tbody.innerHTML = `<tr><td colspan="6" style="color:var(--danger); text-align:center">Error al conectar con la base de datos local.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" style="color:var(--danger); text-align:center">Error al conectar con la base de datos local o de Vercel.</td></tr>`;
   }
 }
 
@@ -464,13 +475,13 @@ function renderWizardStep1(): void {
   `).join("");
 
   shell(`
-    <h1>Nuevo Diagnóstico B2B</h1>
-    <p class="sub">Paso 1: Identifica tu negocio y proporciona los enlaces que analizaremos de forma automática.</p>
+    <h1>Nuevo Diagnóstico General</h1>
+    <p class="sub">Paso 1: Identificación básica. Registra tu nombre y los enlaces que analizaremos en segundo plano.</p>
     
     ${progressHtml}
     
     <div class="panel">
-      <h2>1. Datos Básicos del Negocio</h2>
+      <h2>1. Datos del Negocio</h2>
       <form id="form-step-1">
         <div class="form-row">
           <label>Nombre del Negocio
@@ -481,7 +492,7 @@ function renderWizardStep1(): void {
           </label>
         </div>
         
-        <h2 style="margin-top:2rem; margin-bottom:1rem">2. Enlaces a Redes Sociales</h2>
+        <h2 style="margin-top:2rem; margin-bottom:1rem">2. Enlaces a Redes Sociales (Para Análisis)</h2>
         <div class="form-row">
           <label>Enlace de Instagram
             <input name="instagram_url" value="${wizard.instagram_url}" placeholder="https://www.instagram.com/tu_cuenta" />
@@ -491,14 +502,14 @@ function renderWizardStep1(): void {
           </label>
         </div>
         
-        <h2 style="margin-top:2rem; margin-bottom:1rem">3. Selecciona tu Nicho de Negocio</h2>
+        <h2 style="margin-top:2rem; margin-bottom:1rem">3. Selecciona tu Nicho</h2>
         <div class="grid-select" style="margin-bottom:2rem">${nicheCards}</div>
         
         <h2 style="margin-top:2rem; margin-bottom:1rem">4. Tamaño de la Organización</h2>
         <div class="grid-select" style="margin-bottom:2rem">${sizeCards}</div>
         
         <div style="display:flex; justify-content:flex-end; margin-top:2rem">
-          <button type="submit" class="btn" id="btn-submit-step-1" ${!wizard.niche || !wizard.size ? "disabled" : ""}>Siguiente: Diagnóstico de Negocio →</button>
+          <button type="submit" class="btn" id="btn-submit-step-1" ${!wizard.niche || !wizard.size ? "disabled" : ""}>Siguiente: Diagnóstico B2B →</button>
         </div>
       </form>
     </div>
@@ -547,11 +558,43 @@ function renderWizardStep1(): void {
   });
 }
 
-// Paso 2: Las 9 Preguntas Estratégicas Clicables
+// Paso 2: Las 9 Preguntas Divididas en 3 Ejes (Servicios, Productos, Precio)
 function renderWizardStep2(): void {
-  const q = QUESTIONS[wizard.current_question_index];
+  const index = wizard.current_question_index;
+  const q = QUESTIONS[index];
   const total = QUESTIONS.length;
-  const pct = Math.round(((wizard.current_question_index + 1) / total) * 100);
+  
+  // Calcular el eje actual
+  let ejeTitle = "EJE 1: SERVICIOS (Clientes & Canales)";
+  let ejeStepHtml = `
+    <div style="display:flex; justify-content:space-between; margin-bottom:1rem; font-size:0.78rem; text-transform:uppercase; font-family:var(--display); font-weight:700; color:var(--muted)">
+      <span style="color:var(--accent-2)">● 1. Servicios</span>
+      <span>○ 2. Productos & Operación</span>
+      <span>○ 3. Precio & Comercial</span>
+    </div>
+  `;
+
+  if (index >= 3 && index < 6) {
+    ejeTitle = "EJE 2: PRODUCTOS & OPERACIÓN (Tecnología & Gestión)";
+    ejeStepHtml = `
+      <div style="display:flex; justify-content:space-between; margin-bottom:1rem; font-size:0.78rem; text-transform:uppercase; font-family:var(--display); font-weight:700; color:var(--muted)">
+        <span style="color:var(--success)">✓ 1. Servicios</span>
+        <span style="color:var(--accent-2)">● 2. Productos & Operación</span>
+        <span>○ 3. Precio & Comercial</span>
+      </div>
+    `;
+  } else if (index >= 6) {
+    ejeTitle = "EJE 3: PRECIO & COMERCIAL (Finanzas & Ventas)";
+    ejeStepHtml = `
+      <div style="display:flex; justify-content:space-between; margin-bottom:1rem; font-size:0.78rem; text-transform:uppercase; font-family:var(--display); font-weight:700; color:var(--muted)">
+        <span style="color:var(--success)">✓ 1. Servicios</span>
+        <span style="color:var(--success)">✓ 2. Productos & Operación</span>
+        <span style="color:var(--accent-2)">● 3. Precio & Comercial</span>
+      </div>
+    `;
+  }
+
+  const pct = Math.round(((index + 1) / total) * 100);
   const progressHtml = `<div class="wizard-progress"><div class="wizard-progress-bar" style="width: ${pct}%"></div></div>`;
 
   const optionCards = q.options?.map((opt) => {
@@ -564,9 +607,10 @@ function renderWizardStep2(): void {
   }).join("") || "";
 
   shell(`
-    <h1>Diagnóstico General de Negocio</h1>
-    <p class="sub">Pregunta ${wizard.current_question_index + 1} de ${total}: Responde honestamente para evaluar la madurez de tu negocio.</p>
+    <h1 style="font-size:1.85rem">${ejeTitle}</h1>
+    <p class="sub">Pregunta ${index + 1} de ${total}: Responde de forma transparente para generar tu hoja de ruta.</p>
     
+    ${ejeStepHtml}
     ${progressHtml}
     
     <div class="panel">
@@ -576,8 +620,8 @@ function renderWizardStep2(): void {
       <div class="grid-select" style="margin-top:1.5rem; margin-bottom:2rem">${optionCards}</div>
       
       <div style="display:flex; justify-content:space-between; margin-top:2rem">
-        <button class="btn secondary" id="btn-prev-question" ${wizard.current_question_index === 0 ? "disabled" : ""}>← Pregunta Anterior</button>
-        <button class="btn" id="btn-next-question" disabled>Siguiente Pregunta →</button>
+        <button class="btn secondary" id="btn-prev-question" ${index === 0 ? "disabled" : ""}>← Atrás</button>
+        <button class="btn" id="btn-next-question" disabled>Siguiente →</button>
       </div>
     </div>
   `);
@@ -591,7 +635,6 @@ function renderWizardStep2(): void {
       const val = (card as HTMLElement).dataset.val || "";
       wizard.answers[q.id] = val;
       
-      // Auto-avanzar después de 300ms
       setTimeout(() => {
         advanceQuestion();
       }, 300);
@@ -619,7 +662,6 @@ function renderWizardStep2(): void {
       wizard.current_question_index++;
       renderWizardStep2();
     } else {
-      // Fin del cuestionario, iniciar análisis automatizado
       wizard.step = 3;
       renderCreateAudit();
     }
@@ -650,11 +692,8 @@ function renderWizardStep3(): void {
 
 async function runLiveScan(): Promise<void> {
   const steps = ["ssl", "mobile", "pixels", "conversion", "social", "report"];
-  
-  // Función para simular retraso de HUD visual
   const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-  // Iniciamos la llamada HTTP en paralelo de inmediato para ganar tiempo
   const apiCallPromise = api<{ id: string }>("/api/diagnostics/start", {
     method: "POST",
     body: JSON.stringify({
@@ -669,11 +708,10 @@ async function runLiveScan(): Promise<void> {
     const startResult = await apiCallPromise;
     const auditId = startResult.id;
 
-    // Ejecutamos la animación visual interactiva paso a paso
     for (let i = 0; i < steps.length; i++) {
       const current = document.getElementById(`scan-${steps[i]}`)!;
       current.className = "scan-item active";
-      await delay(650); // Visual delay
+      await delay(650);
 
       current.className = "scan-item done";
       if (i < steps.length - 1) {
@@ -682,7 +720,6 @@ async function runLiveScan(): Promise<void> {
       }
     }
 
-    // Enviamos las respuestas del cuestionario al servidor para consolidar la auditoría
     const resultReport = await api<{ id: string }>(`/api/diagnostics/${auditId}/survey`, {
       method: "POST",
       body: JSON.stringify({
@@ -690,7 +727,7 @@ async function runLiveScan(): Promise<void> {
       }),
     });
 
-    toast("¡Diagnóstico generado con éxito!");
+    toast("¡Diagnóstico generado con éxito y enviado por correo!");
     selectedAuditId = resultReport.id;
     currentView = "audit_report";
     render();
@@ -719,8 +756,14 @@ async function renderAuditReport(): Promise<void> {
   `);
 
   try {
-    const res = await api<AuditReportResponse>(`/api/diagnostics/${selectedAuditId}`);
-    const a = res.audit;
+    const res = await api<any>(`/api/diagnostics/${selectedAuditId}`);
+    
+    // Extracción robusta de propiedades planas para resolver el Bug de Carga
+    const businessName = res.business_name;
+    const websiteUrl = res.website_url;
+    const nicheCode = res.niche;
+    const sizeCode = res.size;
+    const answers = res.survey || {}; // answers se lee desde survey_json
     const r = res.report;
     const scores = r.scores;
 
@@ -730,17 +773,15 @@ async function renderAuditReport(): Promise<void> {
     let b2bDesc = "Tu negocio tiene una base técnica, pero el pilar de ventas y operaciones es manual. Te beneficiarías enormemente de una sesión estratégica para automatizar tareas repetitivas.";
     let b2bCTA = "Agendar Auditoría Estratégica Gratuita";
 
-    // Si tiene procesos manuales y el tiempo de respuesta es lento y tiene cierto tamaño
-    const manualOps = res.answers.operations_coordination === "manual";
-    const slowResponse = res.answers.response_time === "day_or_two" || res.answers.response_time === "more_than_48";
-    const variableRevenue = res.answers.revenue_stability === "highly_variable";
+    const manualOps = answers.operations_coordination === "manual";
+    const slowResponse = answers.response_time === "day_or_two" || answers.response_time === "more_than_48";
 
-    if (manualOps || (slowResponse && a.size !== "solo")) {
+    if (manualOps || (slowResponse && sizeCode !== "solo")) {
       b2bLevel = "high";
       b2bTitle = "Excelente Candidato (Apto - Prioridad Alta)";
       b2bDesc = "Tu negocio cuenta con la escala y fricciones operativas ideales para beneficiarse de una **solución web o app personalizada**. Un desarrollo a medida puede automatizar tu gestión de tareas y acelerar tu tiempo de respuesta comercial a minutos, eliminando fugas de dinero inmediatamente.";
       b2bCTA = "Agendar Consultoría de Desarrollo a Medida (Gratis)";
-    } else if (a.size === "solo") {
+    } else if (sizeCode === "solo") {
       b2bLevel = "low";
       b2bTitle = "Fase Inicial (Aptitud de Software Baja)";
       b2bDesc = "Dado tu tamaño actual, te recomendamos iniciar implementando plantillas autogestionables y herramientas no-code básicas. Aún no requieres un desarrollo a medida robusto. Puedes descargar nuestros recursos gratuitos.";
@@ -749,7 +790,6 @@ async function renderAuditReport(): Promise<void> {
 
     const b2bBadgeClass = b2bLevel === "high" ? "high" : b2bLevel === "medium" ? "medium" : "low";
 
-    // Generar medidores circulares de Scores
     const breakdownPills = `
       <div class="gauge-pill">
         <div class="gauge-pill-header"><span>Cimientos Web</span><span>${scores.web_foundation}%</span></div>
@@ -773,7 +813,6 @@ async function renderAuditReport(): Promise<void> {
       </div>
     `;
 
-    // Generar Lista de Hallazgos Técnicos (Findings)
     const findingsRows = r.findings.map((f) => {
       const areaText: Record<string, string> = {
         web: "💻 Web",
@@ -800,7 +839,6 @@ async function renderAuditReport(): Promise<void> {
       `;
     }).join("");
 
-    // Generar Hoja de Ruta de Soluciones (Accordions)
     const solutionsHtml = r.solution_system.map((s, idx) => `
       <div class="solution-item ${idx === 0 ? "open" : ""}" data-idx="${idx}">
         <div class="solution-header">
@@ -820,7 +858,6 @@ async function renderAuditReport(): Promise<void> {
       </div>
     `).join("");
 
-    // Generar Bonos de Nicho
     const bonusesHtml = r.bonuses.map((b) => `
       <div class="card" style="display:flex; flex-direction:column; justify-content:space-between; gap:1rem">
         <div>
@@ -852,9 +889,9 @@ async function renderAuditReport(): Promise<void> {
 
       <!-- HEADER DEL REPORTE -->
       <div style="margin-bottom:2rem">
-        <h1 style="font-size:2.5rem">${a.business_name}</h1>
+        <h1 style="font-size:2.5rem">${businessName}</h1>
         <p class="sub" style="margin-bottom:0.5rem">${r.niche_label} · ${r.size_label}</p>
-        <p style="font-size:0.9rem; color:var(--muted)">Fecha del Diagnóstico: ${new Date().toLocaleDateString()}</p>
+        <p style="font-size:0.9rem; color:var(--muted)">Sitio Web: <a href="${websiteUrl}" target="_blank" style="color:var(--accent-2); text-decoration:none">${websiteUrl}</a></p>
       </div>
 
       <!-- SCORES E INDICADORES -->
@@ -992,7 +1029,6 @@ async function renderAuditReport(): Promise<void> {
         const item = header.closest(".solution-item")!;
         const wasOpen = item.classList.contains("open");
         
-        // Cierra todos los demás
         document.querySelectorAll(".solution-item").forEach((it) => it.classList.remove("open"));
         
         if (!wasOpen) {
@@ -1028,14 +1064,12 @@ async function renderAuditReport(): Promise<void> {
       const aov = Number(simAov.value);
       const spend = Number(simSpend.value);
 
-      // Labels update
       valVisits.textContent = visits.toLocaleString();
       valConv.textContent = conv.toFixed(1) + "%";
       valClose.textContent = close + "%";
       valAov.textContent = "USD " + aov.toLocaleString();
       valSpend.textContent = "USD " + spend.toLocaleString();
 
-      // Math
       const leads = Math.round((visits * conv) / 100);
       const clients = Math.round((leads * close) / 100);
       const revenue = clients * aov;
@@ -1043,12 +1077,10 @@ async function renderAuditReport(): Promise<void> {
       const cpl = spend > 0 && leads > 0 ? spend / leads : 0;
       const roas = spend > 0 ? revenue / spend : 0;
 
-      // Boost math (+1.5% conv)
       const boostLeads = Math.round((visits * (conv + 1.5)) / 100);
       const boostClients = Math.round((boostLeads * close) / 100);
       const boostRevenue = boostClients * aov;
 
-      // Outputs update
       resLeads.textContent = leads.toLocaleString();
       resClients.textContent = clients.toLocaleString();
       resRevenue.textContent = "USD " + revenue.toLocaleString();
@@ -1061,7 +1093,6 @@ async function renderAuditReport(): Promise<void> {
       slider.addEventListener("input", recalculateSimulator);
     });
 
-    // Iniciar con recálculo inicial
     recalculateSimulator();
 
     // Modal de CTA / Agendamiento
@@ -1083,7 +1114,6 @@ async function renderAuditReport(): Promise<void> {
       toast("🚀 ¡Llamada agendada! Te contactaremos a la brevedad.");
     });
 
-    // Botones de descargar Bonos
     document.querySelectorAll(".btn-claim-bonus").forEach((btn) => {
       btn.addEventListener("click", () => {
         const title = (btn as HTMLElement).dataset.title;
@@ -1093,7 +1123,7 @@ async function renderAuditReport(): Promise<void> {
 
   } catch (err) {
     console.error(err);
-    toast("Error al cargar el reporte.");
+    toast("Error al cargar el reporte ejecutivo.");
     currentView = "dashboard";
     render();
   }

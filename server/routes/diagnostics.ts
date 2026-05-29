@@ -7,6 +7,7 @@ import { getDb } from "../db/index.js";
 import { findNiche, findSize, getSurvey, NICHES, SIZES, type NicheCode, type SizeCode } from "../services/niches.js";
 import { auditWebsite } from "../services/webAudit.js";
 import { buildReport, type SurveyAnswers } from "../services/reportEngine.js";
+import { sendAuditNotification } from "../services/notificationService.js";
 
 export const diagnosticsRouter = Router();
 
@@ -94,6 +95,23 @@ diagnosticsRouter.post("/:id/survey", async (req, res) => {
     now,
     id
   );
+
+  // Obtener nombres amigables para el correo de notificación
+  const businessRow = db.prepare(`SELECT business_name, niche, size FROM diagnostics WHERE id = ?`).get(id) as { business_name: string, niche: string, size: string };
+  const nicheLabel = findNiche(businessRow.niche)?.label || businessRow.niche;
+  const sizeLabel = findSize(businessRow.size)?.label || businessRow.size;
+
+  sendAuditNotification({
+    businessName: businessRow.business_name,
+    websiteUrl: row.website_url,
+    nicheLabel,
+    sizeLabel,
+    segmentLabel: report.segment_label,
+    scores: report.scores,
+    answers: answers as Record<string, string>,
+    audit,
+    report,
+  }).catch((err) => console.error("[diagnosticsRouter] Error enviando correo:", err));
 
   res.json({ id, audit, report });
 });

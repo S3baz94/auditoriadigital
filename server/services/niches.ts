@@ -74,32 +74,12 @@ export interface Question {
 }
 
 export const QUESTIONS: Question[] = [
-  {
-    id: "goal_6m",
-    type: "single",
-    question: "¿Cuál es tu enfoque prioritario para los próximos 6 meses?",
-    helper: "Define la meta estratégica principal de tu negocio.",
-    options: [
-      { value: "more_clients", label: "Conseguir nuevos clientes o expandir mercado" },
-      { value: "more_revenue", label: "Aumentar el ticket promedio de compra o ventas" },
-      { value: "retention", label: "Fidelizar y hacer que los clientes actuales recompren" },
-      { value: "automate", label: "Automatizar procesos internos para ahorrar tiempo y costos" },
-    ],
-  },
-  {
-    id: "revenue_stability",
-    type: "single",
-    question: "¿Cómo calificarías la estabilidad de tus ingresos actuales?",
-    options: [
-      { value: "highly_variable", label: "Muy variable e impredecible mes a mes" },
-      { value: "stable_flat", label: "Estable, pero plano y sin crecimiento" },
-      { value: "growing", label: "Crecimiento constante y predecible" },
-    ],
-  },
+  // ── EJE 1: SERVICIOS ────────────────────────────────────────────────
   {
     id: "acquisition_channel",
     type: "single",
     question: "¿Cuál es tu principal canal para atraer nuevos clientes hoy?",
+    helper: "Eje 1: Servicios. Nos permite entender cómo llegan tus prospectos actualmente.",
     options: [
       { value: "referrals", label: "Recomendaciones de clientes existentes (boca a boca)" },
       { value: "paid_ads", label: "Publicidad digital de pago (Facebook, Instagram, Google)" },
@@ -108,19 +88,10 @@ export const QUESTIONS: Question[] = [
     ],
   },
   {
-    id: "referral_frequency",
-    type: "single",
-    question: "¿Con qué frecuencia tus clientes actuales recomiendan tu negocio de forma activa?",
-    options: [
-      { value: "always", label: "Constantemente, el boca a boca es nuestro motor principal" },
-      { value: "sometimes", label: "Ocasionalmente, solo si alguien les pregunta de forma directa" },
-      { value: "never", label: "Rara vez o nunca nos recomiendan de forma activa" },
-    ],
-  },
-  {
     id: "response_time",
     type: "single",
     question: "¿Cuánto tiempo pasa en promedio desde que un cliente potencial te contacta hasta que recibe respuesta o cotización?",
+    helper: "Eje 1: Servicios. La velocidad de respuesta determina la retención del interés.",
     options: [
       { value: "minutes", label: "Minutos (atención casi inmediata)" },
       { value: "hours", label: "Unas pocas horas" },
@@ -129,19 +100,35 @@ export const QUESTIONS: Question[] = [
     ],
   },
   {
-    id: "sales_followup",
+    id: "referral_frequency",
     type: "single",
-    question: "¿Cómo manejas el seguimiento de las propuestas o cotizaciones enviadas?",
+    question: "¿Con qué frecuencia tus clientes actuales recomiendan tu negocio de forma activa?",
+    helper: "Eje 1: Servicios. Mide el nivel de lealtad y calidad percibida de tu servicio.",
     options: [
-      { value: "crm", label: "Usamos un CRM estructurado para registrar y dar seguimiento" },
-      { value: "manual", label: "De forma manual, agendando recordatorios o por correo directo" },
-      { value: "none", label: "No realizamos un seguimiento sistemático" },
+      { value: "always", label: "Constantemente, el boca a boca es nuestro motor principal" },
+      { value: "sometimes", label: "Ocasionalmente, solo si alguien les pregunta de forma directa" },
+      { value: "never", label: "Rara vez o nunca nos recomiendan de forma activa" },
+    ],
+  },
+
+  // ── EJE 2: PRODUCTO & OPERACIÓN ─────────────────────────────────────
+  {
+    id: "goal_6m",
+    type: "single",
+    question: "¿Cuál es tu enfoque prioritario para los próximos 6 meses?",
+    helper: "Eje 2: Producto & Operación. Define la meta de producto y escala principal.",
+    options: [
+      { value: "more_clients", label: "Conseguir nuevos clientes o expandir mercado" },
+      { value: "more_revenue", label: "Aumentar el ticket promedio de compra o ventas" },
+      { value: "retention", label: "Fidelizar y hacer que los clientes actuales recompren" },
+      { value: "automate", label: "Automatizar procesos internos para ahorrar tiempo y costos" },
     ],
   },
   {
     id: "operations_coordination",
     type: "single",
     question: "¿Cómo gestionas las tareas y la coordinación del día a día con tu equipo?",
+    helper: "Eje 2: Producto & Operación. Determina la eficiencia de tu flujo operativo.",
     options: [
       { value: "automated", label: "Totalmente automatizado con software de gestión de proyectos dedicado" },
       { value: "basic_tools", label: "Herramientas básicas como chats de WhatsApp o tableros de Trello" },
@@ -149,9 +136,34 @@ export const QUESTIONS: Question[] = [
     ],
   },
   {
+    id: "tech_satisfaction",
+    type: "single",
+    question: "¿Qué tan satisfecho estás con las herramientas tecnológicas actuales de tu negocio?",
+    helper: "Eje 2: Producto & Operación. Mide el nivel de fricción tecnológica actual.",
+    options: [
+      { value: "very_satisfied", label: "Muy satisfecho, todo funciona integrado y rápido" },
+      { value: "partially_satisfied", label: "Parcialmente satisfecho, algunas herramientas nos limitan o están aisladas" },
+      { value: "unsatisfied", label: "Insatisfecho, la tecnología nos genera más fricción y problemas" },
+    ],
+  },
+
+  // ── EJE 3: PRECIO & COMERCIAL ───────────────────────────────────────
+  {
+    id: "revenue_stability",
+    type: "single",
+    question: "¿Cómo calificarías la estabilidad de tus ingresos actuales?",
+    helper: "Eje 3: Precio & Comercial. Evalúa la predictibilidad financiera del negocio.",
+    options: [
+      { value: "highly_variable", label: "Muy variable e impredecible mes a mes" },
+      { value: "stable_flat", label: "Estable, pero plano y sin crecimiento" },
+      { value: "growing", label: "Crecimiento constante y predecible" },
+    ],
+  },
+  {
     id: "pricing_strategy",
     type: "single",
     question: "¿Cómo defines los precios de tus productos o servicios?",
+    helper: "Eje 3: Precio & Comercial. Mide tu posicionamiento y salud de márgenes.",
     options: [
       { value: "premium", label: "Precios premium basados en el valor que percibe el cliente" },
       { value: "cost_plus", label: "Margen fijo sumado sobre nuestros costos estimados" },
@@ -160,19 +172,19 @@ export const QUESTIONS: Question[] = [
     ],
   },
   {
-    id: "tech_satisfaction",
+    id: "sales_followup",
     type: "single",
-    question: "¿Qué tan satisfecho estás con las herramientas tecnológicas actuales de tu negocio?",
+    question: "¿Cómo manejas el seguimiento de las propuestas o cotizaciones enviadas?",
+    helper: "Eje 3: Precio & Comercial. Mide la tasa de rescate y cierre comercial.",
     options: [
-      { value: "very_satisfied", label: "Muy satisfecho, todo funciona integrado y rápido" },
-      { value: "partially_satisfied", label: "Parcialmente satisfecho, algunas herramientas nos limitan o están aisladas" },
-      { value: "unsatisfied", label: "Insatisfecho, la tecnología nos genera más fricción y problemas" },
+      { value: "crm", label: "Usamos un CRM estructurado para registrar y dar seguimiento" },
+      { value: "manual", label: "De forma manual, agendando recordatorios o por correo directo" },
+      { value: "none", label: "No realizamos un seguimiento sistemático" },
     ],
   },
 ];
 
 export function getSurvey(_niche: NicheCode, _size: SizeCode): Question[] {
-  // Retorna las 9 preguntas unificadas de diagnóstico general
   return QUESTIONS;
 }
 
