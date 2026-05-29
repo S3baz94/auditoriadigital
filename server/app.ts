@@ -2,31 +2,22 @@ import cors from "cors";
 import express from "express";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { auditsRouter } from "./routes/audits.js";
-import { campaignsRouter } from "./routes/campaigns.js";
-import { leadsRouter } from "./routes/leads.js";
-import { statsRouter } from "./routes/stats.js";
-import { trackRouter } from "./routes/track.js";
+import { diagnosticsRouter } from "./routes/diagnostics.js";
 
 export function createApp(): express.Express {
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
   const app = express();
 
   app.use(cors());
-  app.use(express.json({ limit: "2mb" }));
+  app.use(express.json({ limit: "1mb" }));
 
   app.get("/api/health", (_req, res) => {
-    res.json({ ok: true, name: "LeadPulse", version: "1.0.0" });
+    res.json({ ok: true, name: "Diagnóstico Digital", version: "2.0.0" });
   });
 
-  app.use("/api/leads", leadsRouter);
-  app.use("/api/campaigns", campaignsRouter);
-  app.use("/api/track", trackRouter);
-  app.use("/api/stats", statsRouter);
-  app.use("/api/audits", auditsRouter);
+  app.use("/api/diagnostics", diagnosticsRouter);
 
-  // In Vercel we serve the SPA with rewrites in vercel.json
-  // Local/prod self-host: serve built client from /dist
+  // Servir SPA (local). En Vercel se sirve vía routes en vercel.json.
   const distClient = path.join(__dirname, "../dist");
   app.use(express.static(distClient));
   app.get("*", (req, res, next) => {
@@ -38,4 +29,3 @@ export function createApp(): express.Express {
 
   return app;
 }
-
